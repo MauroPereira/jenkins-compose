@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+
+    environment {
+        // DOCKER_IMAGE_NAME = "mauropereira/simple-nodejs"
+        DEPLOY_SERVER = "192.168.100.21"
+        DEPLOY_USER = "root"
+    } // Llave de cierre agregada aquí
+
+    stages {
+        stage('Testing connection with a creation of foo.txt') {
+            steps {
+                script {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'deploy-ssh-key', keyFileVariable: 'SSH_KEY')]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${DEPLOY_USER}@${DEPLOY_SERVER} bash -c '
+                                # Crear un archivo foo.txt para verificar la conexión
+                                echo "Connection check" > foo.txt
+                            '
+                        """
+                    }
+                }
+            }
+        }
+    }
+}
